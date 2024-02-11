@@ -78,6 +78,16 @@ precis( m5.3 )
 #posterior distribution estimates
 plot( precis(m5.3) )
 ```
+```{r}
+#Write down a multiple regression to evaluate the claim: Animal diversity is linearly related tolatitude, but only after controlling for plant diversity. You just need to write down the model definition
+
+AD=(a+BiPDi)+BiLi
+
+#5E3. Write down a multiple regression to evaluate the claim: Neither amount of funding nor siz of laboratory is by itself a good predictor of time to PhD degree; but together these variables are both positively associated with time to degree. Write down the model definition and indicate which side of zero each slope parameter should be on.
+
+T=a+B(F+S)
+
+```
 
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
