@@ -79,13 +79,31 @@ precis( m5.3 )
 plot( precis(m5.3) )
 ```
 ```{r}
-#Write down a multiple regression to evaluate the claim: Animal diversity is linearly related tolatitude, but only after controlling for plant diversity. You just need to write down the model definition
+#5E2. Write down a multiple regression to evaluate the claim: Animal diversity is linearly related tolatitude, but only after controlling for plant diversity. You just need to write down the model definition
 
 AD=(a+BiPDi)+BiLi
 
 #5E3. Write down a multiple regression to evaluate the claim: Neither amount of funding nor siz of laboratory is by itself a good predictor of time to PhD degree; but together these variables are both positively associated with time to degree. Write down the model definition and indicate which side of zero each slope parameter should be on.
 
 T=a+B(F+S)
+
+#5M1. Invent your own example of a spurious correlation. An outcome variable should be correlated with both predictor variables. But when both predictors are entered in the same model, the correlation between the outcome and one of the predictors should mostly vanish (or at least be greatly reduced).
+
+Lets supose the case of the births of female in a crocodile nest.the gender in the crocodiles is determinated by the temperature at the eggs are incubated. The higher the temperature, the greater the percentage of females there will be. So we can consider the temperature as our real predictor, with a positive slope. At the other hand, There are certain species of grasses that crocodiles usually choose to build their nests, which usually grow in warm climates.
+
+N <- 100 # number of cases 
+x_real <- rnorm( N ) # x_real as Gaussian with mean 0 and stddev 1
+x_spur <- rnorm( N , x_real ) # x_spur as Gaussian with mean=x_real
+y <- rnorm( N , x_real ) # y as Gaussian with mean=x_real
+d <- data.frame(y,x_real,x_spur) # bind all together in data frame
+
+
+#5M2. Invent your own example of a masked relationship. An outcome variable should be correlated with both predictor variables, but in opposite directions. And the two predictor variables should be correlated with one another
+
+Suppose an amphibian population is positively determined by the humidity of its environment, but humidity also positively affects its primary predator populations. The predator population has a negative effect on the amphibian population and the effect of humidity is positive
+
+
+
 
 ```
 
