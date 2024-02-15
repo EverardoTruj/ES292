@@ -84,25 +84,22 @@ library(rethinking)
 #AD=(a+BiPDi)+BiLi
 
 #5E3. Write down a multiple regression to evaluate the claim: Neither amount of funding nor siz of laboratory is by itself a good predictor of time to PhD degree; but together these variables are both positively associated with time to degree. Write down the model definition and indicate which side of zero each slope parameter should be on.
-
 #T=a+B(F+S)
+
 
 #5M1. Invent your own example of a spurious correlation. An outcome variable should be correlated with both predictor variables. But when both predictors are entered in the same model, the correlation between the outcome and one of the predictors should mostly vanish (or at least be greatly reduced).
 
 #Lets supose the case of the births of female in a crocodile nest.the gender in the crocodiles is determinated by the temperature at the eggs are incubated. The higher the temperature, the greater the percentage of females there will be. So we can consider the temperature as our real predictor, with a positive slope. At the other hand, There are certain species of grasses that crocodiles usually choose to build their nests, which usually grow in warm climates.
 
-N <- 100 # number of cases 
-x_real <- rnorm( N ) # x_real as Gaussian with mean 0 and stddev 1
-x_spur <- rnorm( N , x_real ) # x_spur as Gaussian with mean=x_real
-y <- rnorm( N , x_real ) # y as Gaussian with mean=x_real
-d <- data.frame(y,x_real,x_spur) # bind all together in data frame
 
 
 #5M2. Invent your own example of a masked relationship. An outcome variable should be correlated with both predictor variables, but in opposite directions. And the two predictor variables should be correlated with one another
 
 #Suppose an amphibian population is positively determined by the humidity of its environment, but humidity also positively affects its primary predator populations. The predator population has a negative effect on the amphibian population and the effect of humidity is positive
+```
 
 
+```{r}
 #Hard. All three exercises below use the same data, data(foxes) (part of rethinking).81 The urban fox (Vulpes vulpes) is a successful exploiter of human habitat. Since urban foxes move in packs and defend territories, data on habitat quality and population density is also included. The data frame has five columns: 
 #(1) group: Number of the social group the individual fox belongs to
 #(2) avgfood: The average amount of food available in the territory
@@ -112,58 +109,64 @@ d <- data.frame(y,x_real,x_spur) # bind all together in data frame
 
 data(foxes)
 D<-foxes
-str(D)
 D
 #5H1. Fit two bivariate Gaussian regressions, using map: (1) body weight as a linear function of territory size (area), and (2) body weight as a linear function of groupsize. Plot the results of these regressions, displaying the MAP regression line and the 95% interval of the mean. Is either variable important for predicting fox body weight?
 
 # standardize predictor
 D$area <- (D$area-mean(D$area))/sd(D$area)
-
+D$groupsize <- (D$groupsize-mean(D$groupsize))/sd(D$groupsize)
 
 
 # fit models
-E1.1 <- map(
-alist(
-groupsize ~ dnorm( mu , sigma ) ,
-mu <- a + bA * D$area ,
-a ~ dnorm( 4 , 1) ,
-bA ~ dnorm( 0 , 1 ) ,
-sigma ~ dunif( 0 , 10 )
-) , data = D )
-
-E1.2 <- map(
+H1.1 <- map(
 alist(
 weight ~ dnorm( mu , sigma ) ,
 mu <- a + bA * D$area ,
-a ~ dnorm( 4 , 1 ) ,
-bA ~ dnorm( 0 , 1 ) ,
-sigma ~ dunif( 0 , 10 )
+a ~ dnorm( 8 , 3) ,
+bA ~ dnorm( 2 , 10 ) ,
+sigma ~ dunif( 0 , 5 )
 ) , data = D )
 
-precis( E1.1 , corr=TRUE )
-precis( E1.2 , corr=TRUE )
 
-post <- extract.samples(E1.1, n=30 )
-D
+
+H1.2 <- map(
+alist(
+weight ~ dnorm( mu , sigma ) ,
+mu <- a + bR * D$groupsize ,
+a ~ dnorm( 4 , 3 ) ,
+bR ~ dnorm( 2 , 10 ) ,
+sigma ~ dunif( 0 , 5 )
+) , data = D )
+
+precis( H1.1 , TRUE )
+precis( H1.2 , TRUE )
+
+postH1.1 <- extract.samples(H1.1, n=30 )
+postH1.2 <- extract.samples(H1.2, n=30 )
+
 # display raw data and sample size
 N<-30
-plot( D$area , D$groupsize ,
-xlim=range(D$area) , ylim=range(D$groupsize) ,
-col=rangi2 , xlab="Area" , ylab="Group size" )
+plot(  D$area , D$weight,
+xlim=range(D$area) , ylim=range(D$weight) ,
+col=rangi2 , xlab="Area" , ylab="Weight" )
 mtext(concat("N = ",N))
 # plot the lines, with transparency
 for ( i in 1:30 )
 abline( a=post$a[i] , b=post$b[i] , col=col.alpha("black",0.9)) 
 
 N<-30
-plot( D$area , D$weight ,
-xlim=range(D$area) , ylim=range(D$weight) ,
-col=rangi2 , xlab="Area" , ylab="weight" )
+plot( D$groupsize, D$weight , 
+xlim=range(D$groupsize) , ylim=range(D$weight) ,
+col=rangi2 , xlab="Group size" , ylab="weight" )
 mtext(concat("N = ",N))
 # plot the lines, with transparency
 for ( i in 1:30 )
-abline( a=post$a[i] , b=post$b[i] , col=col.alpha("black",0.9)) 
-  
+abline( a=post$a[i] , b=post$b[i] , col=col.alpha("black",0.9))
+
+```
+
+
+```{r}
 #5H2. Now fit a multiple linear regression with weight as the outcome and both area and groupsize as predictor variables. Plot the predictions of the model for each predictor, holding the other predictor constant at its mean. What does this model say about the importance of each variable? Why do you get different results than you got in the exercise just above?
 
 H2.2 <- map(
@@ -171,11 +174,16 @@ alist(
 weight ~ dnorm( mu , sigma ) ,
 mu <- a + bA * D$area +bR*D$groupsize,
 a ~ dnorm( 4 , 1) ,
-bA ~ dnorm( 0 , 1 ),
-bR ~ dnorm( 0 , 1 ),
-sigma ~ dunif( 0 , 10 )
+bA ~ dnorm( 2 , 10 ),
+bR ~ dnorm( 2 , 10 ),
+sigma ~ dunif( 0 , 5 )
 ) , data = D )
 
+precis(H2.2)
+
+postH2.1 <- extract.samples(H2.2, n=30 )
+
+data(foxes)
 # prepare new counterfactual data
 W.avg <- mean(  D$area )
 R.seq <- seq( from=-20 , to=20 , length.out=116 )
@@ -188,7 +196,7 @@ mu.mean <- apply( mu , 2 , mean )
 mu.PI <- apply( mu , 2 , PI )
 
 # simulate counterfactual weight outcomes
-R.sim <- sim(H2.1 , data=pred.data , n=1e4)
+R.sim <- sim(H2.2 , data=pred.data , n=1e4)
 R.PI <- apply( R.sim , 2 , PI )
 
 # display predictions, hiding raw data with type="n"
@@ -212,7 +220,7 @@ mu.mean2 <- apply( mu2 , 2 , mean )
 mu.PI2 <- apply( mu2 , 2 , PI )
 
 # simulate counterfactual weight outcomes
-R.sim2 <- sim(H2.1 , data=pred.data2 , n=1e4)
+R.sim2 <- sim(H2.2 , data=pred.data2 , n=1e4)
 R.PI2 <- apply( R.sim2 , 2 , PI )
 
 # display predictions, hiding raw data with type="n"
@@ -221,17 +229,19 @@ mtext( "MedianAgeMarriage.s = 0" )
 lines( R.seq2 , mu.mean2 )
 shade( mu.PI2 , R.seq2 )
 shade( R.PI2 , R.seq2 )
+```
 
 
+```{r}
 #5H3. Finally, consider the avgfood variable. Fit two more multiple regressions: (1) body weight as an additive function of avgfood and groupsize, and (2) body weight as an additive function of all three variables, avgfood and groupsize and area. Compare the results of these models to the previous models you’ve fit, in the first two exercises. (a) Is avgfood or area a better predictor of body weight? If you had to choose one or the other to include in a model, which would it be? Support your assessment with any tables or plots you choose. (b) When both avgfood or area are in the same model, their effects are reduced (closer to zero) and their standard errors are larger than when they are included in separate models. Can you explain this result?
 
 H3.1 <- map(
 alist(
 weight ~ dnorm( mu , sigma ) ,
 mu <- a +bR*D$groupsize+bZ*D$avgfood,
-a ~ dnorm( 4 , 1) ,
-bR ~ dnorm( 0 , 1 ),
-bZ ~ dnorm( 0 , 1 ),
+a ~ dnorm( 4 , 10) ,
+bR ~ dnorm( 4 , 10 ),
+bZ ~ dnorm( 4 , 10 ),
 sigma ~ dunif( 0 , 10 )
 ) , data = D )
 
@@ -270,6 +280,8 @@ mtext( "Median group size" )
 lines( R.seq3.1 , mu.mean3.1 )
 shade( mu.PI3.1 , R.seq3.1 )
 shade( R.PI3.1 , R.seq3.1 )
+
+
 
 ```
 
