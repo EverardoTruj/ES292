@@ -8,6 +8,68 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r}
+#Chapter 2
+
+
+#Grid aporximation
+
+p_grid<-seq(from=0, to=1, length.out=20)
+prior<-rep(1,20)
+likelihood<-dbinom(7,10,prob = p_grid)
+Posterior<-(likelihood*prior)/sum(likelihood*prior)
+plot(p_grid, Posterior, type="b",
+     xlab="Probability of water", ylab="Posterior probability")
+
+```
+
+```{r}
+#Chapter 3
+library(rethinking)
+p_grid<-seq(from=0,to=1, length.out=1000)
+prior<-rep(1,1000)
+likelihood<-dbinom(7,10,p_grid)
+posterior<-(likelihood*prior)/sum(likelihood*prior)
+posterior
+
+#sampling
+samples <- sample(p_grid, prob=posterior, size=1e4, replace=TRUE)
+plot(samples)
+dens(samples)
+
+#add up posterior probability where p<0.5. SO abut 11% of the posterior probability is below 0.5
+sum(posterior[p_grid<0.5])
+
+#Posterior between two values
+sum( samples > 0.5 & samples < 0.75 ) / 1e4
+
+#Lower 80% posterior probability exists below a parameter value of about 0.78
+quantile(samples, 0.8)
+
+#Middle 80% posterior probability lies between the 10% and 90% quantiles
+quantile(samples,c(0.1,0.9))
+
+#highest posterior density interval (HPDI). s the narrowest interval containing the specified probability mass. 
+HPDI( samples , prob=0.5 )
+
+#Dummy data
+dbinom( 0:2 , size=2 , prob=0.7 )
+
+#The “r” in rbinom stands for “random.”
+rbinom( 10 , size=2 , prob=0.7 )
+
+dummy1<-rbinom( 100000 , size=2 , prob=0.7 )
+table(dummy1)/1e5
+
+dummy2<-rbinom( 100000 , size=2 , prob=0.7 )
+table(dummy2)/1e5
+
+```
+```{r}
+#chapter 4. Linear models
+
+```
+
+```{r}
 #Chapter 5: Multivariate linear models
 
 # load data
@@ -40,7 +102,6 @@ mu.PI <- apply( mu , 2 , PI )
 plot( Divorce ~ MedianAgeMarriage.s , data=d , col=rangi2 )
 abline( m5.1 )
 shade( mu.PI , MAM.seq )
-
 
 ```
 
